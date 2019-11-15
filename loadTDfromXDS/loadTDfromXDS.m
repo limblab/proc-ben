@@ -2,7 +2,7 @@ function trial_data = loadTDfromXDS(filename,params)
     % This is a direct adaptation of Raeed's loadTDfromCDS code for XDS.
     
     %loadtdfromxds Loads trial_data structure from XDS file
-    %   trial_data = loadtdfromcds(filename,params)
+    %   trial_data = loadtdfromxds(filename,params)
     %   Inputs:
     %       filename - (string) location and name of XDS file to load
     %       params - (struct) indicating which signals to load into trial_data
