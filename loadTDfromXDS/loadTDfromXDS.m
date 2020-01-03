@@ -80,6 +80,30 @@ function trial_data = loadTDfromXDS(filename,params)
         xds_array_name = repmat({''},size(array_name));
     end
     
+    %% Make sure we're importing the correct MotorControl labels, if desired (sometimes they're labeled MotorControlSho/MotorControlElb and sometimes they're labeled MotorControl1/Motorcontrol2)
+    
+    if any(strcmpi(cont_signal_names, 'motor_control'))
+        if ~isempty(filename)
+            load(filename);
+        else
+            error_flag = true;
+            disp(['ERROR: ' mfilename ': no filename provided']);
+        end
+        
+        for i = 1:length(xds.analog)
+            if any(contains(xds.analog{i}.Properties.VariableNames, 'MotorControl1'))
+                for csn_index = 1:length(cont_signal_names)
+                    if strcmpi(cont_signal_names{csn_index}, 'motor_control')
+                        cont_signal_names{csn_index} = 'motor_control_12';
+                    end
+                end
+            end
+        end
+    end
+    
+    clear csn_index
+    clear xds
+        
     
     %% Make TD
     cont_signal_labels = get_signal_labels(cont_signal_names);
@@ -135,6 +159,7 @@ function trial_data = loadTDfromXDS(filename,params)
     
     % load trial_data (will result in warning for no meta info, but we're
     % taking most meta info from the XDS anyway)
+
     trial_data = convertDataToTD(signal_info,td_params);
     
     % add some meta information
@@ -150,7 +175,10 @@ function trial_data = loadTDfromXDS(filename,params)
     if any(strcmpi(cont_signal_names,'motor_control'))
         trial_data.motorcontrol_names = {'MotorControlSho','MotorControlElb'};
     end
-    
+    if any(strcmpi(cont_signal_names, 'motor_control_12'))
+        trial_data.motorcontrol_names = {'MotorControl1', 'MotorControl2'};
+        trial_data = renameStructField(trial_data, 'motor_control_12', 'motor_control');
+    end
     % make it pretty
     trial_data = reorderTDfields(trial_data);
 end
@@ -173,6 +201,8 @@ function labels = get_signal_labels(signal_names)
                 labels{sig_idx} = {'fx','fy'};
             case 'motor_control'
                 labels{sig_idx} = {'MotorControlSho','MotorControlElb'};
+            case 'motor_control_12'
+                labels{sig_idx} = {'MotorControl1', 'MotorControl2'};
             case 'markers'
                 labels{sig_idx} = sort(get_marker_labels());
             case 'joint_ang'
