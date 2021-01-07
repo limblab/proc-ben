@@ -132,9 +132,9 @@ filesToMoveManually = {'Filepath'};
 for i = 1:length(dd)
     if isempty(dd(i).date)
         [~, longString] = system(['dir ' dd(i).folder filesep dd(i).name]);
-        if length(longString) ~= 43
+        if length(longString) ~= 43 %longString with length 43 is 'the system cannot find the file specified'
             splitString = split(longString);
-            if ~strcmpi(splitString{16}, 'Date')
+            if all(~strcmpi(splitString{16}, {'Date', 'File'})) %'Date' exception is thrown when it recognizes the file but can't get the date, 'File' exception is thrown when an improper character is used (I think)
                 dd(i).date = splitString{16};
                 goodRows(end+1) = i;
             else
